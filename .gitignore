@@ -1,0 +1,30 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Environments and packaging
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+uv.lock
+
+# Caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Data, checkpoints and run output
+*.pickle
+*.pkl
+*.pth
+*.joblib
+/example_data/
+/logs
+/outputs
+nohup.out
+
+# Editors
+.vscode/
+.idea/
