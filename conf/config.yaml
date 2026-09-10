@@ -1,0 +1,167 @@
+# ===========================================================================
+# 3ASC 3.0 (MIL-GFE) - model configuration.
+# ===========================================================================
+# Directory holding the inputs listed in the README; every path below is
+# relative to it. Point it at your own copy.
+data_root_path: /path/to/3asc_data
+checkpoint_dir_path: ${data_root_path}/checkpoints
+
+# Feature columns taken from each variant's feature vector, in this order.
+features:
+  snv:
+    - ACMG_bayesian
+    - symptom_similarity
+    - vcf_info_QUAL
+    - inhouse_freq
+    - vaf
+    - is_incomplete_zygosity
+    - gnomad_gene:pLI
+    - gnomad_gene:loeuf
+    - wes_AC
+    - wgs_AC
+    - clinvar_variant:scv:pathogenicity_n_p
+    - clinvar_variant:scv:pathogenicity_n_b
+    - PVS1
+    - PS1
+    - PS2
+    - PS3
+    - PS4
+    - PM1
+    - PM2
+    - PM3
+    - PM4
+    - PM5
+    - PM6
+    - PP1
+    - PP2
+    - PP3
+    - PP4
+    - PP5
+    - BA1
+    - BS1
+    - BS2
+    - BS3
+    - BS4
+    - BP1
+    - BP2
+    - BP3
+    - BP4
+    - BP5
+    - BP6
+    - BP7
+  cnv:
+    - ACMG_bayesian
+    - symptom_similarity
+    - num_genes
+    - qual
+    - caller_3bCNV
+    - cnv_type_DEL
+    - cnv_type_DUP
+    - stix:tier
+  str:
+    - repeat_num
+    - inhouse:allele_count
+    - classification
+  bnd:
+    - symptom_similarity
+    - quality
+    - total_depth
+    - vaf
+    - genotype
+    - inhouse:af
+    - sv_type
+    - overlap_gene
+    - mate_number
+    - merged_acmg_class
+    - merged_acmg_bayesian
+    - cds_info_3'UTR
+    - cds_info_5'UTR
+    - cds_info_CDS
+    - PVS1
+    - PS2
+    - PM2
+    - PP5
+  ins:
+    - symptom_similarity
+    - sv_type_INS
+    - sv_type_ALU
+    - sv_type_LINE1
+    - sv_type_SVA
+    - inhouse:af
+    - inhouse:an
+    - vaf
+    - total_depth
+    - closest_exon_dist
+    - acmg_class
+    - acmg_bayesian
+    - PVS1
+    - PS2
+    - PM2
+    - PP5
+
+model:
+  experiment_name: 3asc_v3
+  random_state: 20240618
+  device: cuda:0
+  variant_type:
+    - snv
+    - cnv
+    - str
+    - bnd
+    - ins
+
+  # Symptom/disease embeddings feeding the GFE tower.
+  disease_embeddings_path: ${data_root_path}/gfe/disease_embeddings.pkl
+  patient_symptom_embeddings_path: ${data_root_path}/gfe/patient_symptom_embeddings.pkl
+  disease_cpra_map_path: ${data_root_path}/gfe/cpra_to_disease.json
+
+  parameters:
+    learning_rate: 5.0e-06
+    weight_decay: 0.01
+    warmup_proportion: 0.15
+    n_patience: 20
+    n_hiddens: 512
+    self_attention:
+      rbf_dim: 64
+    transformer:
+      num_heads: 8
+      num_blocks: 16
+      ff_dim: 2048
+      dropout: 0.15
+    mil_gfe:
+      patient_embedding_dim: 4096
+      variant_embedding_dim: 4096
+      gfe_hidden_dim: 512
+      gfe_num_layers: 3
+
+  train:
+    train_data_path: ${data_root_path}/train_cohort.pickle
+    # Sample IDs of this dataset are held out of training.
+    exclude_from_train_data_path: ${data_root_path}/benchmark_cohort.pickle
+    n_epochs: 50
+
+  validation:
+    split_ratio: 0.05
+    top_k: 5
+
+trainer:
+  bag_loss_weight: 0.1
+  instance_loss_weight: 10
+  focal_loss:
+    gamma: 3
+    alpha: 0.9
+  ranknet_loss:
+    sigma: 1.0
+    loss_weight: 1.0
+  gradient_accumulation_steps: 16
+
+evaluate:
+  predictor_path: ${checkpoint_dir_path}/3asc_v3/best_model.pth
+  benchmark_data_path: ${data_root_path}/benchmark_cohort.pickle
+  device: cuda:0
+  top_k: 100
+  # The published benchmark numbers use the benchmark disease map; training
+  # uses the non-benchmark one above.
+  disease_embeddings_path: ${data_root_path}/gfe/disease_embeddings.pkl
+  patient_symptom_embeddings_path: ${data_root_path}/gfe/patient_symptom_embeddings.pkl
+  disease_cpra_map_path: ${data_root_path}/gfe/cpra_to_disease_benchmark.json
