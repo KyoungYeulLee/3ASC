@@ -20,10 +20,18 @@ uv.lock
 *.pkl
 *.pth
 *.joblib
-/example_data/
+*.safetensors
+*.bin
+example_data/
+checkpoints/
 /logs
-/outputs
+/output*/
 nohup.out
+
+# Real cohort inputs and GFE records - never commit
+*.json
+*.jsonl
+!conf/*.json
 
 # Editors
 .vscode/
