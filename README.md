@@ -70,6 +70,27 @@ variant is of each type: top-k recall over CPRAs up to k = 100, the pooled AUROC
 and PR-AUC over every variant of every patient, and the mean per-patient AUROC
 and PR-AUC.
 
+### The ranking loss
+
+`pointwise_ranknet_loss` in `core/losses.py` is the code the published model was
+trained with, and it is not a literal transcription of the RankNet
+cross-entropy. Two sign inversions cancel - `pij` is built from
+`sigmoid(-sigma * ...)` and the cost is returned as `1 - c` - and the pair
+selection indexes whole rows rather than single entries, so the mean also covers
+the non-causal rows and their targets of 0.0 and 0.5. The docstring of the
+function records both.
+
+Writing `d` for the score gap between a causal variant and one of its non-causal
+neighbours, the implemented per-pair cost is `1 - softplus(d)` against the
+textbook `softplus(-d)`, the two related by `1 - d - softplus(-d)`. Both fall as
+`d` grows. The loss is fed instance probabilities, so `d` stays inside `[-1, 1]`,
+and over that window the two gradients are mirror images of one another: across a
+bag of a few hundred variants they agree in direction to a cosine above 0.999,
+and the magnitude carried by the causal variant differs by between 0.5x and 1.1x.
+They are still different functions - the textbook form presses hardest on the
+pairs the model ranks wrongly, this one on the pairs it already ranks well - so
+the file is kept as it was run rather than tidied towards the equation.
+
 ### How top-k recall is counted
 
 The ranking is over CPRAs, not over rows: a variant can be reported once per
@@ -122,8 +143,10 @@ equivalent dataset from your own cases.
 
 The instance labels of the published training run additionally mark externally
 curated BND and INS true calls as causal on patients the source cohort had left
-negative. Those labels are part of the dataset that is assembled - `VariantData.y`
-carries them - and not a step this code performs.
+negative. These are curated true calls rather than clinically confirmed causal
+variants, so no clinically confirmed BND or INS positive entered training. Those
+labels are part of the dataset that is assembled - `VariantData.y` carries them -
+and not a step this code performs.
 
 ### Example data
 
