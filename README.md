@@ -96,6 +96,9 @@ A cohort is a pickled `PatientDataSet`, so it has to be created with these
 dataclasses importable as `core.data_model` - assemble it with this repository
 on the path, or the pickle cannot be reconstructed.
 
+Unpickling executes arbitrary code, so load only the cohort and embedding files
+you built yourself or received from a source you trust.
+
 ### Inputs
 
 | config key | what it is |
