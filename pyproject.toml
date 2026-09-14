@@ -1,0 +1,44 @@
+[project]
+name = "3asc-mil-gfe"
+version = "3.0"
+description = "3ASC 3.0: Integrating Large Language Models and Multiple Instance Learning for Comprehensive Prioritization of SNVs and Structural Variants in Rare Mendelian Diseases"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "iterative-stratification>=0.1.9",
+    "joblib>=1.4.2",
+    "numpy==1.26.4",
+    "omegaconf>=2.3.0",
+    "scikit-learn>=1.6.1",
+    "torch>=2.0.0",
+    "tqdm>=4.67.1",
+    # GFE embedding model (scripts/embedding/): LoRA training and the vLLM
+    # inference used to extract the embeddings. vLLM pins the torch version.
+    "ms-swift==3.6.0",
+    "deepspeed==0.17.1",
+    "vllm==0.9.1",
+    "transformers==4.52.4",
+]
+
+[tool.setuptools]
+packages = ["core", "model"]
+
+[tool.ruff]
+# rules to apply
+lint.select = ["ANN001", "ANN201", "D100", "D101", "D102", "D103", "D401", "D403", "D417", "E5", "E7", "E9", "F4", "F8", "I"]
+
+# rules to ignore
+lint.ignore = []
+
+# log output format
+output-format = "full"
+
+# directory/files to skip checking
+exclude = [".git", "**/__init__.py"]
+
+# code style
+line-length = 88
+target-version = "py312"
+
+# auto fix
+fix = true
