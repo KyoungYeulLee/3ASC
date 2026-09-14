@@ -1,0 +1,38 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+
+# Environments and packaging
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+uv.lock
+
+# Caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Data, checkpoints and run output
+*.pickle
+*.pkl
+*.pth
+*.joblib
+*.safetensors
+*.bin
+example_data/
+checkpoints/
+/logs
+/output*/
+nohup.out
+
+# Real cohort inputs and GFE records - never commit
+*.json
+*.jsonl
+!conf/*.json
+
+# Editors
+.vscode/
+.idea/
